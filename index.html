@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI QA Intelligence Agent</title>
+    <style>
+      :root {
+        --bg: #f6f7fb;
+        --card: rgba(255, 255, 255, 0.92);
+        --cardSolid: #ffffff;
+        --text: #0f172a;
+        --muted: #475569;
+        --border: rgba(15, 23, 42, 0.10);
+        --shadow: 0px 18px 50px rgba(16, 24, 40, 0.10);
+        --shadowSoft: 0px 10px 24px rgba(16, 24, 40, 0.08);
+        --accent: #245bff;
+        --accent2: #16a34a;
+        --danger: #dc2626;
+        --warn: #d97706;
+        --ring: rgba(36, 91, 255, 0.25);
+        --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+          "Segoe UI Emoji";
+        color: var(--text);
+        background:
+          radial-gradient(1100px 680px at 12% 6%, rgba(36, 91, 255, 0.18), transparent 60%),
+          radial-gradient(1100px 680px at 90% 0%, rgba(22, 163, 74, 0.14), transparent 58%),
+          radial-gradient(900px 520px at 50% 100%, rgba(217, 119, 6, 0.10), transparent 55%),
+          var(--bg);
+        padding: 28px 18px 60px;
+      }
+
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 22px;
+        letter-spacing: -0.2px;
+      }
+
+      .sub {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .pillbar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .pill {
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(10px);
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        color: rgba(15, 23, 42, 0.72);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      @media (max-width: 980px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: var(--shadowSoft);
+      }
+
+      label {
+        display: block;
+        font-size: 12px;
+        color: rgba(15, 23, 42, 0.66);
+        margin: 12px 0 6px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin: 0;
+        border-radius: 12px;
+        border: 1px solid rgba(15, 23, 42, 0.14);
+        background: var(--cardSolid);
+        color: var(--text);
+        outline: none;
+        transition: box-shadow 120ms ease, border-color 120ms ease;
+      }
+
+      input:focus,
+      textarea:focus {
+        border-color: rgba(36, 91, 255, 0.45);
+        box-shadow: 0 0 0 4px var(--ring);
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+        font-family: var(--mono);
+        line-height: 1.35;
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-top: 14px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        background: linear-gradient(180deg, rgba(36, 91, 255, 1), rgba(36, 91, 255, 0.88));
+        color: white;
+        padding: 10px 14px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 700;
+        box-shadow: 0 10px 20px rgba(36, 91, 255, 0.20);
+        transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+      }
+
+      button:hover {
+        filter: brightness(1.02);
+        transform: translateY(-1px);
+        box-shadow: 0 14px 26px rgba(36, 91, 255, 0.22);
+      }
+
+      button.secondary {
+        background: linear-gradient(180deg, rgba(15, 23, 42, 1), rgba(15, 23, 42, 0.92));
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
+      }
+
+      button.ghost {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid rgba(15, 23, 42, 0.18);
+        font-weight: 600;
+        box-shadow: none;
+      }
+
+      button:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .banner {
+        display: none;
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(217, 119, 6, 0.28);
+        background: rgba(255, 247, 237, 0.9);
+        color: #7c2d12;
+      }
+
+      .banner.show {
+        display: block;
+      }
+
+      .banner.error {
+        background: rgba(254, 242, 242, 0.92);
+        color: #7f1d1d;
+        border-color: rgba(220, 38, 38, 0.28);
+      }
+
+      .banner.success {
+        background: rgba(240, 253, 244, 0.92);
+        color: #14532d;
+        border-color: rgba(22, 163, 74, 0.28);
+      }
+
+      @keyframes flashRing {
+        0% {
+          box-shadow: 0 0 0 0 rgba(36, 91, 255, 0);
+        }
+        20% {
+          box-shadow: 0 0 0 6px rgba(36, 91, 255, 0.20);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(36, 91, 255, 0);
+        }
+      }
+
+      .flash {
+        animation: flashRing 900ms ease-out 1;
+      }
+
+      .outGrid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      @media (max-width: 980px) {
+        .outGrid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .mini {
+        padding: 14px;
+      }
+
+      .mini h3 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        letter-spacing: -0.1px;
+      }
+
+      .mini p,
+      .mini pre {
+        margin: 0;
+        color: var(--text);
+        font-size: 13px;
+        line-height: 1.35;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 2px 0 0;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(15, 23, 42, 0.14);
+        background: rgba(255, 255, 255, 0.65);
+        font-size: 12px;
+        color: rgba(15, 23, 42, 0.68);
+        font-weight: 700;
+      }
+
+      .badge.sev-Critical,
+      .badge.pri-P0 {
+        border-color: rgba(239, 68, 68, 0.35);
+        background: rgba(239, 68, 68, 0.08);
+        color: #991b1b;
+      }
+
+      .badge.sev-High,
+      .badge.pri-P1 {
+        border-color: rgba(245, 158, 11, 0.4);
+        background: rgba(245, 158, 11, 0.10);
+        color: #92400e;
+      }
+
+      .badge.sev-Medium,
+      .badge.pri-P2 {
+        border-color: rgba(37, 99, 235, 0.35);
+        background: rgba(37, 99, 235, 0.08);
+        color: #1e40af;
+      }
+
+      .badge.sev-Low,
+      .badge.pri-P3 {
+        border-color: rgba(107, 114, 128, 0.35);
+        background: rgba(107, 114, 128, 0.08);
+        color: #374151;
+      }
+
+      .jsonBox {
+        margin-top: 10px;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #0b1220;
+        color: #e5e7eb;
+        font-family: var(--mono);
+        font-size: 12px;
+        line-height: 1.35;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 420px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <h2>AI QA Intelligence Agent</h2>
+          <div class="sub">Runs <code>/analyze</code> and renders a QA + product analysis. Uses relative URLs (no hardcoded localhost).</div>
+        </div>
+        <div class="pillbar">
+          <span class="pill" id="pillBase"></span>
+          <span class="pill" id="pillStatus">status: —</span>
+          <span class="pill" id="pillStage">stage: —</span>
+        </div>
+      </header>
+
+      <div class="grid">
+        <section class="card">
+          <label for="testName">Test Name</label>
+          <input id="testName" placeholder="Test Name" value="Checkout fails" />
+
+          <label for="testSteps">Test Steps</label>
+          <textarea id="testSteps" placeholder="Test Steps">1) Add item to cart
+2) Checkout
+3) Observe error</textarea>
+
+          <label for="logs">Error Logs</label>
+          <textarea id="logs" placeholder="Error Logs">Error: payment_intent_failed (status 400)
+Stack: ...
+RequestId: ...</textarea>
+
+          <div class="row">
+            <button id="analyzeBtn">Analyze</button>
+            <button id="autofillBtn" class="ghost" type="button">Auto‑Fill Demo Failure</button>
+            <button id="healthBtn" class="ghost" type="button">Health</button>
+            <button id="copyBtn" class="secondary" type="button" disabled>Copy JSON</button>
+            <button id="clearBtn" class="ghost" type="button">Clear</button>
+            <span class="sub" id="msg"></span>
+          </div>
+
+          <div id="banner" class="banner"></div>
+        </section>
+
+        <section class="card">
+          <div class="badges" id="badges"></div>
+          <div id="output" class="sub" style="margin: 6px 0 10px"></div>
+          <div class="outGrid" id="cards"></div>
+          <div class="jsonBox" id="rawJson">{}</div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      const BASE = window.location.origin;
+      document.getElementById("pillBase").textContent = BASE;
+
+      const el = (id) => document.getElementById(id);
+      const analyzeBtn = el("analyzeBtn");
+      const autofillBtn = el("autofillBtn");
+      const healthBtn = el("healthBtn");
+      const copyBtn = el("copyBtn");
+      const clearBtn = el("clearBtn");
+      const msg = el("msg");
+      const banner = el("banner");
+      const pillStatus = el("pillStatus");
+      const pillStage = el("pillStage");
+      const cards = el("cards");
+      const badges = el("badges");
+      const rawJson = el("rawJson");
+      const output = el("output");
+
+      let lastJsonText = "{}";
+
+      const setBusy = (busy) => {
+        analyzeBtn.disabled = busy;
+        autofillBtn.disabled = busy;
+        healthBtn.disabled = busy;
+        clearBtn.disabled = busy;
+      };
+
+      const setPills = (status, stage) => {
+        pillStatus.textContent = `status: ${status ?? "—"}`;
+        pillStage.textContent = `stage: ${stage ?? "—"}`;
+      };
+
+      const showBanner = (text, kind) => {
+        if (!text) {
+          banner.className = "banner";
+          banner.textContent = "";
+          return;
+        }
+        banner.className =
+          "banner show" + (kind === "error" ? " error" : kind === "success" ? " success" : "");
+        banner.textContent = text;
+      };
+
+      const pretty = (obj) => JSON.stringify(obj, null, 2);
+
+      const escapeHtml = (s) =>
+        String(s)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+
+      const card = (title, value) => {
+        const safe = escapeHtml(value ?? "");
+        return `
+          <div class="card mini">
+            <h3>${escapeHtml(title)}</h3>
+            <p>${safe}</p>
+          </div>
+        `;
+      };
+
+      const fixSuggestionCard = (fixSuggestion) => {
+        const language = fixSuggestion && fixSuggestion.language ? escapeHtml(fixSuggestion.language) : "—";
+        const rawCode = fixSuggestion && fixSuggestion.code ? String(fixSuggestion.code) : "";
+        const code = rawCode ? escapeHtml(rawCode) : "";
+        const encoded = encodeURIComponent(rawCode);
+        return `
+          <div class="card mini">
+            <h3>🛠️ Fix Suggestion</h3>
+            <p><b>Language:</b> ${language}</p>
+            <div style="margin: 6px 0 10px">
+              <button class="ghost js-copy-fix-code" type="button" data-code="${escapeHtml(encoded)}" ${
+                rawCode ? "" : "disabled"
+              }>
+                Copy Code
+              </button>
+            </div>
+            <pre style="background:#000;color:#0f0;padding:10px;border-radius:6px; overflow:auto;">${code}</pre>
+          </div>
+        `;
+      };
+
+      const badge = (label, value, cls) =>
+        `<span class="badge ${cls ?? ""}">${escapeHtml(label)}: ${escapeHtml(value ?? "—")}</span>`;
+
+      function validateInput() {
+        const testName = el("testName").value.trim();
+        const testSteps = el("testSteps").value.trim();
+        const logs = el("logs").value.trim();
+        const missing = [];
+        if (!testName) missing.push("testName");
+        if (!testSteps) missing.push("testSteps");
+        if (!logs) missing.push("logs");
+        return { ok: missing.length === 0, missing, testName, testSteps, logs };
+      }
+
+      const randId = (prefix) =>
+        `${prefix}_${Math.random().toString(16).slice(2)}${Math.random().toString(16).slice(2)}`.slice(0, 28);
+
+      const nowIso = () => new Date().toISOString();
+
+      const DEMO_FAILURES = [
+        () => {
+          const requestId = randId("req");
+          return {
+            label: "Payment API 400 (checkout)",
+            testName: "Checkout > Place Order > payment_intent_failed",
+            testSteps: [
+              "1) Login as a valid user",
+              "2) Add an in-stock item to cart",
+              "3) Go to Checkout",
+              "4) Enter a valid shipping address",
+              "5) Select card payment",
+              "6) Click Place Order",
+              "Expected: Order is placed and confirmation page is shown",
+            ].join("\n"),
+            logs: [
+              `[${nowIso()}] env=staging suite=e2e spec=checkout.spec.ts`,
+              `[${nowIso()}] POST /api/checkout/submit -> 400 (82ms) requestId=${requestId}`,
+              `Error: payment_intent_failed`,
+              `Details: { "provider":"stripe", "code":"insufficient_funds", "retryable":false }`,
+              `Response: { "error":"PAYMENT_INTENT_FAILED", "message":"Payment authorization failed" }`,
+              `Trace:`,
+              `  at CheckoutService.submitOrder(CheckoutService.java:214)`,
+              `  at PaymentGateway.charge(PaymentGateway.java:98)`,
+              `  at StripeClient.confirmPaymentIntent(StripeClient.java:141)`,
+              `UI assertion failed: expected text "Order confirmed" to be visible`,
+            ].join("\n"),
+          };
+        },
+        () => {
+          const correlationId = randId("corr");
+          return {
+            label: "Backend 500 (null pointer)",
+            testName: "Profile > Update email > should persist new email",
+            testSteps: [
+              "1) Login",
+              "2) Navigate to Settings > Profile",
+              "3) Change Email to a valid value",
+              "4) Click Save",
+              "Expected: Success toast + email updated in UI and via GET /api/me",
+            ].join("\n"),
+            logs: [
+              `[${nowIso()}] env=staging suite=e2e spec=profile.spec.ts`,
+              `[${nowIso()}] PUT /api/users/me -> 500 (41ms) correlationId=${correlationId}`,
+              `java.lang.NullPointerException: Cannot invoke "String.trim()" because "email" is null`,
+              `  at UserService.updateEmail(UserService.java:77)`,
+              `  at UserController.updateMe(UserController.java:52)`,
+              `Response: { "error":"INTERNAL_SERVER_ERROR", "message":"Unexpected error" }`,
+              `UI assertion failed: expected toast "Saved"`,
+            ].join("\n"),
+          };
+        },
+        () => {
+          const requestId = randId("req");
+          return {
+            label: "UI JS error (undefined property)",
+            testName: "Search > results page > renders product cards",
+            testSteps: [
+              "1) Open /search?q=headphones",
+              "2) Wait for results grid to render",
+              "Expected: At least 1 product card with title + price",
+            ].join("\n"),
+            logs: [
+              `[${nowIso()}] env=staging suite=ui spec=search.spec.ts`,
+              `GET /api/search?q=headphones -> 200 (132ms) requestId=${requestId}`,
+              `Browser console error: TypeError: Cannot read properties of undefined (reading 'price')`,
+              `  at ProductCard (ProductCard.tsx:44)`,
+              `  at ResultsGrid (ResultsGrid.tsx:88)`,
+              `Payload sample: items[0]={ "id":"p_123", "title":"Wireless Headphones" }  // missing price`,
+              `UI assertion failed: expected .product-card count >= 1`,
+            ].join("\n"),
+          };
+        },
+      ];
+
+      let demoIdx = 0;
+      function autoFillDemo() {
+        const next = DEMO_FAILURES[demoIdx % DEMO_FAILURES.length]();
+        demoIdx += 1;
+
+        el("testName").value = next.testName;
+        el("testSteps").value = next.testSteps;
+        el("logs").value = next.logs;
+
+        // Make the UI feel like a fresh "captured failure" event
+        output.textContent = "✅ System captured a real failure. Ready to analyze.";
+        badges.innerHTML = "";
+        cards.innerHTML = "";
+        lastJsonText = "{}";
+        rawJson.textContent = lastJsonText;
+        copyBtn.disabled = true;
+        setPills("—", "—");
+        showBanner(`Captured failure: ${next.label}`, "success");
+        msg.textContent = "✅ Auto-filled. Click Analyze.";
+
+        // Visual confirmation that fields changed
+        const fields = [el("testName"), el("testSteps"), el("logs")];
+        fields.forEach((f) => {
+          f.classList.remove("flash");
+          // force reflow so animation re-triggers
+          void f.offsetWidth;
+          f.classList.add("flash");
+        });
+        el("testName").scrollIntoView({ behavior: "smooth", block: "center" });
+
+        setTimeout(() => showBanner("", null), 1200);
+      }
+
+      async function fetchJson(path, opts = {}, timeoutMs = 20000) {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          const r = await fetch(`${BASE}${path}`, { ...opts, signal: controller.signal });
+          const stage = r.headers.get("X-Debug-Stage");
+          const text = await r.text();
+          let json;
+          try {
+            json = text ? JSON.parse(text) : {};
+          } catch {
+            json = { error: { message: "Non-JSON response from server." }, raw: text };
+          }
+          return { r, stage, json, text };
+        } finally {
+          clearTimeout(t);
+        }
+      }
+
+      function renderResult(data) {
+        badges.innerHTML = "";
+        cards.innerHTML = "";
+        rawJson.textContent = lastJsonText;
+
+        if (!data || data.error) return;
+
+        badges.innerHTML =
+          badge("Severity", data.severity, `sev-${data.severity}`) +
+          badge("Priority", data.bugPriority, `pri-${data.bugPriority}`) +
+          badge("Confidence", data.confidence, "") +
+          badge("Category", data.category, "");
+
+        cards.innerHTML =
+          card("Root Cause", data.rootCause) +
+          card("Test Intent", data.testIntent) +
+          card("Product Impact", data.productImpact) +
+          card("Reproduction Steps", data.reproductionSteps) +
+          fixSuggestionCard(data.fixSuggestion) +
+          card("QA Insights", data.qaInsights);
+      }
+
+      async function onHealth() {
+        setBusy(true);
+        showBanner("", null);
+        msg.textContent = "Checking /health...";
+        setPills("—", "—");
+        try {
+          const { r, stage, json } = await fetchJson("/health", { method: "GET" }, 7000);
+          setPills(r.status, stage);
+          lastJsonText = pretty(json);
+          rawJson.textContent = lastJsonText;
+          copyBtn.disabled = false;
+          msg.textContent = r.ok ? "Healthy." : "Health check failed.";
+        } catch (e) {
+          msg.textContent = "Request failed.";
+          showBanner(String(e), "error");
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      async function onAnalyze() {
+        document.getElementById("output").innerHTML = "⏳ Analyzing...";
+        setBusy(true);
+        showBanner("", null);
+        msg.textContent = "Analyzing...";
+        setPills("—", "—");
+        copyBtn.disabled = true;
+
+        const v = validateInput();
+        if (!v.ok) {
+          setBusy(false);
+          msg.textContent = "";
+          output.textContent = "";
+          showBanner(`Missing required fields: ${v.missing.join(", ")}`, "error");
+          return;
+        }
+
+        try {
+          const { r, stage, json } = await fetchJson(
+            "/analyze",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ testName: v.testName, testSteps: v.testSteps, logs: v.logs }),
+            },
+            30000,
+          );
+
+          setPills(r.status, stage);
+          lastJsonText = pretty(json);
+          rawJson.textContent = lastJsonText;
+          output.textContent = "";
+
+          if (!r.ok) {
+            const m = json?.error?.message || "Server returned an error.";
+            showBanner(m, "error");
+            renderResult({ error: true });
+            msg.textContent = "Error.";
+            return;
+          }
+
+          renderResult(json);
+          copyBtn.disabled = false;
+          msg.textContent = "Done.";
+        } catch (e) {
+          msg.textContent = "Request failed.";
+          output.textContent = "";
+          showBanner(String(e), "error");
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      async function onCopy() {
+        try {
+          await navigator.clipboard.writeText(lastJsonText);
+          showBanner("Copied JSON to clipboard.", null);
+          setTimeout(() => showBanner("", null), 1200);
+        } catch {
+          showBanner("Copy failed (clipboard permission).", "error");
+        }
+      }
+
+      cards.addEventListener("click", async (event) => {
+        const target = event.target;
+        const btn = target && target.closest ? target.closest(".js-copy-fix-code") : null;
+        if (!btn) return;
+
+        const encoded = btn.getAttribute("data-code") || "";
+        const text = decodeURIComponent(encoded);
+        if (!text) {
+          showBanner("No code to copy.", "error");
+          return;
+        }
+
+        const prev = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "Copying...";
+
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.textContent = "Copied ✓";
+          showBanner("Copied fix code to clipboard.", null);
+          setTimeout(() => showBanner("", null), 1200);
+        } catch {
+          btn.textContent = prev || "Copy Code";
+          showBanner("Copy failed (clipboard permission).", "error");
+        } finally {
+          setTimeout(() => {
+            btn.textContent = prev || "Copy Code";
+            btn.disabled = false;
+          }, 1200);
+        }
+      });
+
+      function onClear() {
+        el("testName").value = "";
+        el("testSteps").value = "";
+        el("logs").value = "";
+        badges.innerHTML = "";
+        cards.innerHTML = "";
+        lastJsonText = "{}";
+        rawJson.textContent = lastJsonText;
+        copyBtn.disabled = true;
+        msg.textContent = "";
+        showBanner("", null);
+        setPills("—", "—");
+      }
+
+      analyzeBtn.addEventListener("click", onAnalyze);
+      autofillBtn.addEventListener("click", autoFillDemo);
+      healthBtn.addEventListener("click", onHealth);
+      copyBtn.addEventListener("click", onCopy);
+      clearBtn.addEventListener("click", onClear);
+    </script>
+  </body>
+</html>
+
